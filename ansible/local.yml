@@ -47,7 +47,7 @@
       become: false
       loop:
         - nvim
-      when: >
+      when:
         - nvim_src.stat.exists
         - not nvim_dest.stat.isdir
 
