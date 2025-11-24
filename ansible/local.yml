@@ -3,6 +3,9 @@
   gather_facts: true
   become: false
 
+  vars:
+    user_home: "{{ lookup('env', 'HOME') }}"
+
   tasks:
     - name: Update apt cache
       become: true
@@ -19,24 +22,34 @@
           - ibus-mozc
         state: present
 
+    - name: Stat nvim source directory
+      stat:
+        path: "{{ user_home }}/dotfiles/config/nvim"
+      register: nvim_src
+
+    - name: Stat nvim destination directory
+      stat:
+        path: "{{ user_home }}/.config/nvim"
+      register: nvim_dest
+
     - name: Ensure .config directory exists
       file:
-        path: "{{ ansible_env.HOME }}/.config"
+        path: "{{ user_home }}/.config"
         state: directory
         mode: '0755'
       become: false
 
     - name: Create symbolic link for Neovim
       file:
-        src: "{{ ansible_env.HOME }}/dotfiles/config/{{ item }}"  # 実体 (dotfiles内)
-        dest: "{{ ansible_env.HOME }}/.config/{{ item }}"         # リンク先 (システム側)
+        src: "{{ user_home }}/dotfiles/config/{{ item }}"  # 実体 (dotfiles内)
+        dest: "{{ user_home }}/.config/{{ item }}"         # リンク先 (システム側)
         state: link
       become: false
       loop:
         - nvim
       when: >
-        ansible_env.HOME+'/dotfiles/config/nvim' is exists
-        and ansible_env.HOME+'/.config/nvim' is not directory
+        - nvim_src.stat.exists
+        - not nvim_dest.stat.isdir
 
     - name: Add Mozc to GNOME input sources
       command: >
