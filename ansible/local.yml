@@ -1,6 +1,7 @@
 - hosts: localhost
   connection: local
   gather_facts: true
+  become: true
 
   tasks:
     - name: Update apt cache
@@ -15,6 +16,7 @@
         name:
           - curl
           - tree
+          - ibus-mozc
         state: present
 
     - name: Ensure .config directory exists
@@ -22,13 +24,22 @@
         path: "{{ ansible_env.HOME}}/.config"
         state: directory
         mode: '0755'
+      become: false
 
     - name: Create symbolic link for Neovim
       file:
         src: "{{ ansible_env.HOME }}/dotfiles/config/{{ item }}"  # 実体 (dotfiles内)
         dest: "{{ ansible_env.HOME }}/.config/{{ item }}"         # リンク先 (システム側)
         state: link
-        force: yes
-        follow: no
+      become: false
       loop:
         - nvim
+      when: >
+        ansible_env.HOME+'/dotfiles/config/nvim' is exists
+        and ansible_env.HOME+'/.config/nvim' is not directory
+
+    - name: Add Mozc to GNOME input sources
+      command: >
+        gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'mozc-jp')]"
+      become: false
+      changed_when: false
