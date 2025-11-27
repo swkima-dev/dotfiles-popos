@@ -1,0 +1,19 @@
+---
+- name: Create fonts directory
+  file:
+    path: "{{ user_home }}/.local/share/fonts"
+    state: directory
+  become: false
+
+- name: Download Hack Nerd Font
+  unarchive:
+    src: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.zip
+    dest: "{{ user_home }}/.local/share/fonts"
+    remote_src: yes
+  become: false
+  register: font_install
+
+- name: Refresh font cache
+  command: fc-cache -fv
+  become: false
+  when: font_install.changed
