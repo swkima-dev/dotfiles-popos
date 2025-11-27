@@ -60,6 +60,7 @@
   roles:
     - gnome
     - fonts
+    - zsh
     - vscode
 
     - languages/rust

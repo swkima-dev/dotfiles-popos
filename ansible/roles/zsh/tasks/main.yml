@@ -1,4 +1,5 @@
 ---
+# Zsh Install
 - name: Ensure zsh is installed
   become: true
   apt:
@@ -22,5 +23,26 @@
   file:
     src: "{{ ansible_env.HOME }}/dotfiles-popos/config/zsh/zshrc"
     dest: "{{ ansible_env.HOME  }}/.zshrc"
+    state: link
+    force: yes
+
+# Starship Install
+- name: Install Starship
+  become: true
+  shell: |
+    curl -fsSL https://starship.rs/install.sh | sh -s -- -y
+  args:
+    creates: /usr/local/bin/starship
+
+- name: Ensure starship config directory exists
+  file:
+    path: "{{ ansible_env.HOME }}/.config"
+    state: directory
+    mode: '0755'
+
+- name: Link starship config
+  file:
+    src: "{{ ansible_env.HOME }}/dotfiles-popos/config/starship/starship.toml"
+    dest: "{{ ansible_env.HOME }}/.config/starship.toml"
     state: link
     force: yes
