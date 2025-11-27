@@ -1,0 +1,65 @@
+# --- Navy Blade (Cyber Slate Color Edition) ---
+add_newline = false
+
+format = """
+[](fg:#0a0a0a)\
+$username\
+[](fg:#0a0a0a bg:#1e1e2e)\
+$directory\
+[](fg:#1e1e2e bg:#3a0ca3)\
+$git_branch$git_status\
+[](fg:#3a0ca3 bg:#4361ee)\
+$docker_context\
+[](fg:#4361ee bg:#4cc9f0)\
+$time\
+[](fg:#4cc9f0)\
+$line_break$character
+"""
+
+# ===== USERNAME =====
+[username]
+show_always = true
+# Pop!_OSアイコン（）へ変更
+format = "[   $user ]($style)"
+style_user = "bg:#0a0a0a fg:#4cc9f0"
+
+# ===== DIRECTORY =====
+[directory]
+format = "[   $path ]($style)"
+style = "bg:#1e1e2e fg:#dcdcdc"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+# ===== GIT =====
+[git_branch]
+symbol = " "
+format = "[ $symbol$branch ]($style)"
+style = "bg:#3a0ca3 fg:#ffffff"
+
+[git_status]
+style = "bg:#3a0ca3 fg:#ffffff"
+format = "(fg:#3a0ca3 bg:#4361ee)"
+
+# ===== DOCKER =====
+[docker_context]
+symbol = " "
+style = "bg:#4361ee fg:#ffffff"
+format = "[](fg:#3a0ca3 bg:#4361ee)[$symbol $context]($style)"
+
+# ===== TIME =====
+[time]
+disabled = false
+format = "[  $time ]($style)"
+time_format = "%H:%M"
+style = "bg:#4cc9f0 fg:#1e1e1e"
+
+# ===== PROMPT CHARACTER =====
+[character]
+success_symbol = "[❯](bold #4cc9f0) "
+error_symbol   = "[❯](bold #ff4477) "
