@@ -1,0 +1,21 @@
+---
+# GNOMEの入力ソース切り替えキーを変更する
+# switch-input-source: 順方向 (Ctrl + Space)
+# switch-input-source-backward: 逆方向 (Shift + Ctrl + Space)
+
+- name: Change input source switching to Ctrl+Space
+  command: >
+    gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Control>Space']"
+  become: false  # 【重要】必ずユーザー権限で実行する
+
+- name: Change backward input source switching to Shift+Ctrl+Space
+  command: >
+    gsettings set org.gnome.desktop.wm.keybindings switch-input-source-backward "['<Shift><Control>Space']"
+  become: false
+
+# ついでに、Mozc入力ソースの追加設定もここに移動しておくと綺麗です
+- name: Add Mozc to GNOME input sources
+  command: >
+    gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'mozc-jp')]"
+  become: false
+  changed_when: false

@@ -56,3 +56,6 @@
         gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'mozc-jp')]"
       become: false
       changed_when: false
+
+  roles:
+    - gnome
