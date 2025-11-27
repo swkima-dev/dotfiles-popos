@@ -11,6 +11,8 @@
     dest: "{{ user_home }}/.local/share/fonts"
     remote_src: yes
   become: false
+  args:
+    creates: "{{ user_home }}/.local/share/fonts/HackNerdFont-Regular.ttf"
   register: font_install
 
 - name: Refresh font cache
