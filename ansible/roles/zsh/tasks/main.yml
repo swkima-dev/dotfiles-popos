@@ -1,0 +1,26 @@
+---
+- name: Ensure zsh is installed
+  become: true
+  apt:
+    name: zsh
+    state: present
+    update_cache: yes
+
+- name: Detect zsh binary path
+  become: true
+  command: which zsh
+  register: zsh_path
+  changed_when: false
+
+- name: Set default shell to zsh for current user
+  become: true
+  user:
+    name: "{{ ansible_user_id }}"
+    shell: "{{ zsh_path.stdout }}"
+
+- name: Link zshrc
+  file:
+    src: "{{ ansible_env.HOME }}/dotfiles-popos/config/zsh/zshrc"
+    dest: "{{ ansible_env.HOME  }}/.zshrc"
+    state: link
+    force: yes
