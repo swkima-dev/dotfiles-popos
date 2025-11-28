@@ -47,10 +47,74 @@
     state: link
     force: yes
 
-# # eza
-# - name: eza install
-#   become: true
-#   apt:
-#     name: eza
-#     state: present
-#     update_cache: yes
+# eza　Install
+- name: 必要なパッケージのインストール (gpg)
+  ansible.builtin.apt:
+    name: gpg
+    state: present
+    update_cache: yes
+  become: true
+
+- name: keyringsディレクトリの作成
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: GPGキーのダウンロードとdearmor化
+  # Ansibleにはdearmor機能がないためshellを使用しますが、createsを指定して冪等性を担保します
+  ansible.builtin.shell: |
+    set -o pipefail
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+  args:
+    executable: /bin/bash
+    creates: /etc/apt/keyrings/gierens.gpg
+  become: true
+
+- name: GPGキーのパーミッション設定
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/gierens.gpg
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+
+- name: ezaリポジトリの追加
+  # apt_repositoryモジュールを使うことで、/etc/apt/sources.list.d/gierens.list を自動生成・管理します
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main"
+    filename: gierens
+    state: present
+    update_cache: yes
+  become: true
+
+- name: ezaのインストール
+  ansible.builtin.apt:
+    name: eza
+    state: present
+  become: true
+
+# zoxide Install
+- name: Ensure curl is installed for zoxide installation
+  ansible.builtin.apt:
+    name: curl
+    state: present
+  become: true
+
+- name: Install zoxide
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh -s -- --bin-dir /usr/local/bin
+  become: true
+  args:
+    executable: /bin/bash
+    creates: /usr/local/bin/zoxide
+
+# bat Install
+- name: Ensure bat is installed
+  become: true
+  apt:
+    name: bat
+    state: present 
