@@ -1,0 +1,37 @@
+---
+- name: 変数の定義
+  ansible.builtin.set_fact:
+    nvm_version: "v0.40.3"
+    node_version: "24"
+    nvm_dir: "{{ ansible_user_dir }}/.nvm"
+
+- name: 必要なパッケージのインストール (curl)
+  ansible.builtin.apt:
+    name: curl
+    state: present
+  become: true
+
+- name: nvmのインストール
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_version }}/install.sh | bash
+  args:
+    executable: /bin/bash
+    creates: "{{ nvm_dir }}/nvm.sh"
+
+- name: Node.js (v{{ node_version }}) のインストール
+  ansible.builtin.shell: |
+    . {{ nvm_dir }}/nvm.sh
+    nvm install {{ node_version }}
+  args:
+    executable: /bin/bash
+    # 指定バージョンのnode実行ファイルがあればスキップ（冪等性担保）
+    creates: "{{ nvm_dir }}/versions/node/v{{ node_version }}*/bin/node"
+
+- name: デフォルトバージョンの設定 (alias default)
+  ansible.builtin.shell: |
+    . {{ nvm_dir }}/nvm.sh
+    nvm alias default {{ node_version }}
+  args:
+    executable: /bin/bash
+  changed_when: false

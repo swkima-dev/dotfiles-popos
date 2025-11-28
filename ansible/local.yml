@@ -68,7 +68,8 @@
     - gnome
     - fonts
     - zsh
-    - vscode
     - themes
+    - develop
+    - vscode
 
     - languages/rust
