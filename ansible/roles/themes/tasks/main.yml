@@ -1,0 +1,63 @@
+---
+- name: Ensure theme directories exist
+  file:
+    path: "{{ ansible_env.HOME }}/{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - .themes
+    - .icons
+
+- name: Download Nordic
+  get_url:
+    url: "https://github.com/EliverLara/Nordic/archive/refs/heads/master.zip"
+    dest: /tmp/Nordic.zip
+
+- name: Extract Nordic
+  unarchive:
+    src: /tmp/Nordic.zip
+    dest: "{{ ansible_env.HOME }}/.themes/"
+    remote_src: true
+  args:
+    creates: "{{ ansible_env.HOME }}/.themes/Nordic-master"
+
+- name: Install psutils
+  become: true
+  apt:
+    name: python3-psutil
+    state: present
+
+- name: Install gnome-shell-extensions
+  become: true
+  apt:
+    name: gnome-shell-extensions
+    state: present
+
+- name: Enable User Themes extension
+  command: >
+    gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
+  ignore_errors: true
+
+- name: Enable GNOME User Themes extension
+  command: >
+    gnome-extensions enable pop-shell@system76.com
+  ignore_errors: true
+
+- name: Apply GTK theme
+  dconf:
+    key: "/org/gnome/desktop/interface/gtk-theme"
+    value: "'Nordic-master'"
+
+- name: Apply Shell theme
+  dconf:
+    key: "/org/gnome/shell/extensions/user-theme/name"
+    value: "'Nordic-master'"
+
+# - name: Apply icon theme
+#   dconf:
+#     key: "/org/gnome/desktop/interface/icon-theme"
+#     value: "'Papirus-Dark'"
+
+- name: Inform user
+  debug:
+    msg: "テーマ適用が完了しました。必要であれば GNOME Shell を再起動（ログアウト→ログイン）してください。"

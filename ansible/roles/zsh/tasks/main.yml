@@ -46,3 +46,11 @@
     dest: "{{ ansible_env.HOME }}/.config/starship.toml"
     state: link
     force: yes
+
+# # eza
+# - name: eza install
+#   become: true
+#   apt:
+#     name: eza
+#     state: present
+#     update_cache: yes

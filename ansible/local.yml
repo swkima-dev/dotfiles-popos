@@ -59,7 +59,7 @@
 
     - name: Create symbolic link for ibus mozc config
       file:
-        src: "{{ user_home }}/dotfiles/config/mozc/ibus-config.textproto"  # 実体 (dotfiles内)
+        src: "{{ user_home }}/dotfiles-popos/config/mozc/ibus-config.textproto"  # 実体 (dotfiles内)
         dest: "{{ user_home }}/.config/mozc/ibus-config.textproto"       # リンク先 (システム側)
         state: link
       become: false
@@ -69,5 +69,6 @@
     - fonts
     - zsh
     - vscode
+    - themes
 
     - languages/rust
