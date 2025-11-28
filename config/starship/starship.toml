@@ -1,32 +1,28 @@
-# --- Navy Blade (Cyber Slate Color Edition) ---
 add_newline = false
 
 format = """
-[](fg:#0a0a0a)\
+[](fg:#303030)\
 $username\
-[](fg:#0a0a0a bg:#1e1e2e)\
+[](fg:#0087AF bg:#303030)\
 $directory\
-[](fg:#1e1e2e bg:#3a0ca3)\
+[](fg:#303030 bg:#D7005F)\
 $git_branch$git_status\
-[](fg:#3a0ca3 bg:#4361ee)\
+[](fg:#D7005F bg:#0087AF)\
 $docker_context\
-[](fg:#4361ee bg:#4cc9f0)\
+[](fg:#0087AF bg:#303030)\
 $time\
-[](fg:#4cc9f0)\
+[](fg:#303030)\
 $line_break$character
 """
 
-# ===== USERNAME =====
 [username]
 show_always = true
-# Pop!_OSアイコン（）へ変更
 format = "[   $user ]($style)"
-style_user = "bg:#0a0a0a fg:#4cc9f0"
+style_user = "bg:#0087AF fg:#ffffff"
 
-# ===== DIRECTORY =====
 [directory]
 format = "[   $path ]($style)"
-style = "bg:#1e1e2e fg:#dcdcdc"
+style = "bg:#303030 fg:#ffffff"
 truncation_length = 3
 truncation_symbol = "…/"
 
@@ -36,30 +32,26 @@ truncation_symbol = "…/"
 "Music" = " "
 "Pictures" = " "
 
-# ===== GIT =====
 [git_branch]
 symbol = " "
 format = "[ $symbol$branch ]($style)"
-style = "bg:#3a0ca3 fg:#ffffff"
+style = "bg:#D7005F fg:#ffffff"
 
 [git_status]
-style = "bg:#3a0ca3 fg:#ffffff"
-format = "(fg:#3a0ca3 bg:#4361ee)"
+style = "bg:#D7005F fg:#ffffff"
+format = "[[($all_status$ahead_behind )](fg:#ffffff bg:#D7005F)]($style)"
 
-# ===== DOCKER =====
 [docker_context]
 symbol = " "
-style = "bg:#4361ee fg:#ffffff"
-format = "[](fg:#3a0ca3 bg:#4361ee)[$symbol $context]($style)"
+style = "bg:#D7005F fg:#ffffff"
+format = "[](fg:#D7005F bg:#D7005F)[$symbol $context]($style)"
 
-# ===== TIME =====
 [time]
 disabled = false
 format = "[  $time ]($style)"
 time_format = "%H:%M"
-style = "bg:#4cc9f0 fg:#1e1e1e"
+style = "bg:#303030 fg:#ffffff"
 
-# ===== PROMPT CHARACTER =====
 [character]
-success_symbol = "[❯](bold #4cc9f0) "
-error_symbol   = "[❯](bold #ff4477) "
+success_symbol = "[❯](bold #0087AF) "
+error_symbol   = "[❯](bold #D7005F) "
