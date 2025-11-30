@@ -71,5 +71,6 @@
     - themes
     - develop
     - vscode
+    - neovim
 
     - languages/rust

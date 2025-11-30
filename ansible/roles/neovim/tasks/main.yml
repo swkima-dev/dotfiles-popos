@@ -1,0 +1,62 @@
+---
+# Install Bob (Neovim plugin manager)
+- name: Download Bob zip file
+  get_url:
+    url: "{{ bob_download_url }}"
+    dest: "/tmp/bob.zip"
+    mode: '0755'
+
+- name: unzip Bob
+  unarchive:
+    src: "/tmp/bob.zip"
+    dest: "{{ user_home }}/.local/bin/"
+    remote_src: yes
+    mode: '0755'
+
+# Install Neovim
+- name: Install Neovim using Bob
+  command: "bob install stable"
+  register: bob_result            # コマンドの実行結果を変数 bob_result に格納
+  changed_when: "'is already installed' not in bob_result.stdout"
+  # ↑ 解説: Bobは常に終了コード0を返すことがあるため、
+  # 標準出力に "already installed" が含まれていない場合のみ「変更あり(黄色)」とみなす判定ロジック
+
+- name: Set default Neovim version
+  become: false
+  command: "bob use stable"
+  changed_when: false # 単なる切り替えなので、常に「変更なし(緑)」として扱う
+
+- name: Add Bob path to .bashrc
+  become: false
+  lineinfile:   # ファイル内の特定の行を管理するモジュール
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"'
+    state: present # この行が存在することを保証（なければ追記、あれば何もしない）
+
+# Install AstroNvim
+- name: Check if nvim config exists
+  become: false
+  stat:         # ファイルやディレクトリの状態を確認するモジュール (ls -l 的なもの)
+    path: "{{ nvim_config_dir }}"
+  register: nvim_config_stat # 結果を変数に保存
+
+- name: Backup existing nvim config
+  become: false
+  command: "mv {{ nvim_config_dir }} {{ nvim_config_dir }}.bak.{{ ansible_date_time.iso8601 }}"
+  when:         # 条件分岐
+    - nvim_config_stat.stat.exists  # ディレクトリが存在する場合
+    - not nvim_config_stat.stat.islnk # かつ、シンボリックリンクではない場合 (Git管理のリンク等を想定)
+
+- name: Clone AstroNvim repository
+  become: false
+  git:          # git clone/pull を行うモジュール
+    repo: "https://github.com/AstroNvim/template"
+    dest: "{{ nvim_config_dir }}"
+    version: main # ブランチ名
+    depth: 1      # 最新コミットのみ取得（高速化・容量節約）
+
+- name: rm useless .git in nvim config
+  become: false
+  file:
+    path: "{{ nvim_config_dir }}/.git"
+    state: absent
