@@ -35,3 +35,52 @@
   args:
     executable: /bin/bash
   changed_when: false
+
+# Docker Install
+- name: Install required packages for Docker
+  become: true
+  apt:
+    name:
+      - ca-certificates
+      - curl
+    state: present
+    update_cache: yes
+
+- name: Create /etc/apt/keyrings directory
+  become: true
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Add Docker's official GPG key
+  become: true
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+
+# NOTE: deb822_repository モジュールを使うほうが良いが、バージョンが古いと使えない
+# よって、現時点では手動で sources.list ファイルを作成する方法を採用
+- name: Add Docker apt repository
+  become: true
+  copy:
+    dest: /etc/apt/sources.list.d/docker.sources
+    content: |
+      Types: deb
+      URIs: https://download.docker.com/linux/ubuntu
+      Suites: {{ ansible_distribution_release }}
+      Components: stable
+      Signed-By: /etc/apt/keyrings/docker.asc
+  
+- name: Install Docker Engine
+  become: true
+  apt:
+    name:
+      - docker-ce 
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: yes
