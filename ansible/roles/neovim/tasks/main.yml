@@ -1,37 +1,47 @@
 ---
-# Install Bob (Neovim plugin manager)
-- name: Download Bob zip file
-  get_url:
-    url: "{{ bob_download_url }}"
-    dest: "/tmp/bob.zip"
-    mode: '0755'
+# Install Neovim via AppImage
+- name: Neovimのセットアップ
+  block:
+    # 1. AppImageの実行に必要なFUSEライブラリをインストール
+    # (Pop!_OSやUbuntu 22.04+ではデフォルトで入っていないことが多いため必須)
+    - name: Install libfuse2 (Required for AppImage)
+      apt:
+        name: libfuse2
+        state: present
+      become: true
 
-- name: unzip Bob
-  unarchive:
-    src: "/tmp/bob.zip"
-    dest: "{{ user_home }}/.local/bin/"
-    remote_src: yes
-    mode: '0755'
+    # 2. 現在のバージョンを確認 (インストール済みの場合)
+    - name: Check current Neovim version
+      shell: "nvim --version | head -n 1 | awk '{print $2}'"
+      register: nvim_current_version
+      changed_when: false
+      failed_when: false
 
-# Install Neovim
-- name: Install Neovim using Bob
-  command: "bob install stable"
-  register: bob_result            # コマンドの実行結果を変数 bob_result に格納
-  changed_when: "'is already installed' not in bob_result.stdout"
-  # ↑ 解説: Bobは常に終了コード0を返すことがあるため、
-  # 標準出力に "already installed" が含まれていない場合のみ「変更あり(黄色)」とみなす判定ロジック
+    # 3. GitHub APIから最新のStableリリースの情報を取得
+    - name: Get latest stable release info from GitHub
+      uri:
+        url: https://api.github.com/repos/neovim/neovim/releases/latest
+        return_content: true
+      register: nvim_latest_release
 
-- name: Set default Neovim version
-  become: false
-  command: "bob use stable"
-  changed_when: false # 単なる切り替えなので、常に「変更なし(緑)」として扱う
+    # 4. バージョン比較とインストール
+    # (ローカルが存在しない or ローカルとリモートのバージョンが不一致の場合に実行)
+    - name: Download and install Neovim AppImage
+      get_url:
+        # 最新タグを使ってダウンロードURLを構築
+        url: "https://github.com/neovim/neovim/releases/download/{{ nvim_latest_release.json.tag_name }}/nvim-linux-x86_64.appimage"
+        dest: /usr/local/bin/nvim
+        mode: '0755' # 実行権限を付与 (chmod u+x 相当)
+        force: true  # バージョン違いなら上書きする
+      become: true
+      # 条件: 「Neovimが入っていない」 または 「バージョンが最新ではない」
+      when: >
+        nvim_current_version.rc != 0 or
+        nvim_current_version.stdout != nvim_latest_release.json.tag_name
 
-- name: Add Bob path to .bashrc
-  become: false
-  lineinfile:   # ファイル内の特定の行を管理するモジュール
-    path: "{{ ansible_env.HOME }}/.bashrc"
-    line: 'export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"'
-    state: present # この行が存在することを保証（なければ追記、あれば何もしない）
+    - name: Display installed version
+      debug:
+        msg: "Neovim installed version: {{ nvim_latest_release.json.tag_name }}"
 
 # Install AstroNvim
 - name: Check if nvim config exists
@@ -60,3 +70,11 @@
   file:
     path: "{{ nvim_config_dir }}/.git"
     state: absent
+
+- name: Link nvim init.lua from dotfiles
+  become: false
+  file:
+    src: "{{ ansible_env.HOME }}/dotfiles-popos/config/nvim/init.lua"
+    dest: "{{ ansible_env.HOME }}/.config/nvim/init.lua"
+    state: link
+    force: true
