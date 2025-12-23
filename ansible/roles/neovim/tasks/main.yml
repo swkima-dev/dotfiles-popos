@@ -78,3 +78,10 @@
     dest: "{{ ansible_env.HOME }}/.config/nvim/init.lua"
     state: link
     force: true
+
+# NeovimとOSでClipboardを同期する
+- name: Install xclip for clipboard integration
+  become: true
+  apt:
+    name: xclip
+    state: present
