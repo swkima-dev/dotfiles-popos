@@ -1,0 +1,68 @@
+---
+- name: Install Alacritty build dependencies
+  apt:
+    name:
+      - cmake
+      - pkg-config
+      - libfreetype6-dev
+      - libfontconfig1-dev
+      - libxcb-xfixes0-dev
+      - libxkbcommon-dev
+    state: present
+  become: true
+
+- name: Clone Alacritty repository
+  git:
+    repo: https://github.com/alacritty/alacritty.git
+    dest: "{{ ansible_env.HOME }}/.local/src/alacritty"
+    update: yes
+
+- name: move to Alacritty directory and build
+  ansible.builtin.shell: |
+    cd {{ ansible_env.HOME }}/.local/src/alacritty
+    cargo build --release
+  args:
+    executable: /bin/bash
+
+- name: copy Alacritty binary to local bin
+  become: true
+  copy:
+    src: "{{ ansible_env.HOME }}/.local/src/alacritty/target/release/alacritty"
+    dest: /usr/local/bin
+    mode: '0755'
+
+- name: copy Alacritty Logo
+  become: true
+  copy:
+    src: "{{ ansible_env.HOME }}/.local/src/alacritty/extra/logo/alacritty-term.svg"
+    dest: /usr/share/pixmaps/alacritty.svg
+    mode: '0644'
+
+- name: copy Alacritty desktop entry
+  become: true
+  args:
+    chdir: "{{ ansible_env.HOME }}/.local/src/alacritty"
+    creates: "/usr/share/applications/Alacritty.desktop"
+  command: >
+    desktop-file-install extra/linux/Alacritty.desktop
+  
+- name: Update desktop database
+  become: true
+  args:
+    chdir: "{{ ansible_env.HOME }}/.local/src/alacritty"
+  command: >
+    update-desktop-database /usr/share/applications/
+
+- name: Ensure .config/alacritty directory exists
+  file:
+    path: "{{ user_home }}/.config/alacritty"
+    state: directory
+    mode: '0755'
+  become: false
+
+- name: Create symbolic link for Alacritty
+  file:
+    src: "{{ user_home }}/dotfiles-popos/config/alacritty/alacritty.toml" 
+    dest: "{{ user_home }}/.config/alacritty/alacritty.toml"
+    state: link
+  become: false
