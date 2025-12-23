@@ -39,17 +39,17 @@
         mode: '0755'
       become: false
 
-    - name: Create symbolic link for Neovim
-      file:
-        src: "{{ user_home }}/dotfiles/config/{{ item }}"  # 実体 (dotfiles内)
-        dest: "{{ user_home }}/.config/{{ item }}"         # リンク先 (システム側)
-        state: link
-      become: false
-      loop:
-        - nvim
-      when:
-        - nvim_src.stat.exists
-        - not nvim_dest.stat.isdir
+    # - name: Create symbolic link for Neovim
+    #   file:
+    #     src: "{{ user_home }}/dotfiles/config/{{ item }}"  # 実体 (dotfiles内)
+    #     dest: "{{ user_home }}/.config/{{ item }}"         # リンク先 (システム側)
+    #     state: link
+    #   become: false
+    #   loop:
+    #     - nvim
+    #   when:
+    #     - nvim_src.stat.exists
+    #     - not nvim_dest.stat.isdir
 
     - name: Add Mozc to GNOME input sources
       command: >
@@ -74,3 +74,4 @@
     - neovim
 
     - languages/rust
+    - alacritty
