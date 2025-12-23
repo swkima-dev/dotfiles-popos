@@ -5,7 +5,8 @@
   apt:
     name: zsh
     state: present
-    update_cache: yes
+    # local.yml ですでに update_cache しているため以下は不要
+    # update_cache: yes
 
 - name: Detect zsh binary path
   become: true

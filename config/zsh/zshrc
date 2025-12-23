@@ -47,6 +47,9 @@ if type eza >/dev/null 2>&1; then
   alias e='eza'
 fi
 
+if type lsd >/dev/null 2>&1; then
+  alias e='lsd'
+fi
 # bat alias
 if type batcat >/dev/null 2>&1; then
   alias b="batcat"

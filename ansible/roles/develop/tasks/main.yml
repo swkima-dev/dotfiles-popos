@@ -44,7 +44,8 @@
       - ca-certificates
       - curl
     state: present
-    update_cache: yes
+    # local.yml ですでに update_cache しているため以下は不要
+    # update_cache: yes
 
 - name: Create /etc/apt/keyrings directory
   become: true
@@ -83,4 +84,12 @@
       - docker-buildx-plugin
       - docker-compose-plugin
     state: present
-    update_cache: yes
+
+# Pip, venv Install
+- name: Install pip and venv
+  become: true
+  apt:
+    name:
+      - python3-pip
+      - python3-venv
+    state: present
