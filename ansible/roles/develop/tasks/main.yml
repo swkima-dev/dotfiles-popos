@@ -93,3 +93,10 @@
       - python3-pip
       - python3-venv
     state: present
+
+# uv install
+- name: Install uv if not installed
+  shell: |
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/uv"

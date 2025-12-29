@@ -68,3 +68,7 @@ export NVM_DIR="$HOME/.nvm"
 # Local bin
 # Claude codeなどで使う実行ファイルを置く場所
 export PATH="$HOME/.local/bin:$PATH"
+export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+
+# uv's complement
+eval "$(uv generate-shell-completion zsh)"
