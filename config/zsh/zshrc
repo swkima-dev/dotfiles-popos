@@ -72,3 +72,6 @@ export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 
 # uv's complement
 eval "$(uv generate-shell-completion zsh)"
+
+# sheldon loading plugins
+eval "$(sheldon source)"

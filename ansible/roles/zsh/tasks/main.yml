@@ -119,3 +119,39 @@
   apt:
     name: bat
     state: present 
+
+# sheldon install
+- name: Check if sheldon is already installed
+  command: "{{ ansible_env.HOME }}/.cargo/bin/sheldon --version"
+  register: sheldon_check
+  changed_when: false
+  failed_when: false
+
+- name: Install sheldon via cargo
+  command: cargo install sheldon
+  when: sheldon_check.rc != 1
+
+- name: Ensure sheldon config directory exists
+  file:
+    path: "{{ ansible_env.HOME }}/.config/sheldon"
+    state: directory
+    mode: "0755"
+
+- name: Check if sheldon plugins.toml exists
+  stat:
+    path: "{{ ansible_env.HOME }}/.config/sheldon/plugins.toml"
+  register: sheldon_plugins_stat
+
+- name: Create empty sheldon plugins.toml if not exists
+  file:
+    path: "{{ ansible_env.HOME }}/.config/sheldon/plugins.toml"
+    state: touch
+    mode: "0644"
+  when: not sheldon_plugins_stat.stat.exists
+
+- name: Link sheldon/plugins.toml
+  file:
+    src: "{{ ansible_env.HOME }}/dotfiles-popos/config/sheldon/plugins.toml"
+    dest: "{{ ansible_env.HOME  }}/.config/sheldon/plugins.toml"
+    state: link
+    force: yes
