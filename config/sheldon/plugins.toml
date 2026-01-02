@@ -14,7 +14,8 @@ shell = "zsh"
 
 [plugins]
 
-# For example:
-#
-# [plugins.base16]
-# github = "chriskempson/base16-shell"
+[plugins.syntaxhighlighting]
+github = "zsh-users/zsh-syntax-highlighting"
+
+[plugins.autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
