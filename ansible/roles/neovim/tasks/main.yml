@@ -50,12 +50,21 @@
     path: "{{ nvim_config_dir }}"
   register: nvim_config_stat # 結果を変数に保存
 
+# AstroNvimが既に導入されているかチェック
+# AstroNvimのテンプレートには lua/lazy_setup.lua が含まれているのでこれをマーカーとして使用
+- name: Check if AstroNvim is already installed
+  become: false
+  stat:
+    path: "{{ nvim_config_dir }}/lua/lazy_setup.lua"
+  register: astronvim_marker
+
 - name: Backup existing nvim config
   become: false
   command: "mv {{ nvim_config_dir }} {{ nvim_config_dir }}.bak.{{ ansible_date_time.iso8601 }}"
   when:         # 条件分岐
     - nvim_config_stat.stat.exists  # ディレクトリが存在する場合
     - not nvim_config_stat.stat.islnk # かつ、シンボリックリンクではない場合 (Git管理のリンク等を想定)
+    - not astronvim_marker.stat.exists # かつ、AstroNvimがまだ導入されていない場合
 
 - name: Clone AstroNvim repository
   become: false
@@ -64,20 +73,22 @@
     dest: "{{ nvim_config_dir }}"
     version: main # ブランチ名
     depth: 1      # 最新コミットのみ取得（高速化・容量節約）
+  when: not astronvim_marker.stat.exists # AstroNvimがまだ導入されていない場合のみ実行
 
 - name: rm useless .git in nvim config
   become: false
   file:
     path: "{{ nvim_config_dir }}/.git"
     state: absent
+  when: not astronvim_marker.stat.exists # AstroNvimを新規導入した場合のみ実行
 
-- name: Link nvim init.lua from dotfiles
-  become: false
-  file:
-    src: "{{ ansible_env.HOME }}/dotfiles-popos/config/nvim/init.lua"
-    dest: "{{ ansible_env.HOME }}/.config/nvim/init.lua"
-    state: link
-    force: true
+# - name: Link nvim init.lua from dotfiles
+#   become: false
+#   file:
+#     src: "{{ ansible_env.HOME }}/dotfiles-popos/config/nvim/init.lua"
+#     dest: "{{ ansible_env.HOME }}/.config/nvim/init.lua"
+#     state: link
+#     force: true
 
 # NeovimとOSでClipboardを同期する
 - name: Install xclip for clipboard integration
