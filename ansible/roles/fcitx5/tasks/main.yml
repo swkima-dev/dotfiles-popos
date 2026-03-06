@@ -1,0 +1,63 @@
+---
+# fcitx5 + Mozc のインストールと設定
+
+- name: Install fcitx5 and mozc
+  become: true
+  apt:
+    name:
+      - fcitx5
+      - fcitx5-mozc
+      - fcitx5-config-qt
+    state: present
+
+- name: Create xprofile symlink (fcitx5 env vars)
+  file:
+    src: "{{ user_home }}/dotfiles-popos/config/xprofile/.xprofile"
+    dest: "{{ user_home }}/.xprofile"
+    state: link
+  become: false
+
+- name: Ensure fcitx5 config directory exists
+  file:
+    path: "{{ user_home }}/.config/fcitx5"
+    state: directory
+    mode: '0755'
+  become: false
+
+- name: Deploy fcitx5 profile (us + mozc)
+  copy:
+    src: "{{ user_home }}/dotfiles-popos/config/fcitx5/profile"
+    dest: "{{ user_home }}/.config/fcitx5/profile"
+    mode: '0644'
+  become: false
+
+- name: Ensure autostart directory exists
+  file:
+    path: "{{ user_home }}/.config/autostart"
+    state: directory
+    mode: '0755'
+  become: false
+
+- name: Autostart fcitx5
+  copy:
+    dest: "{{ user_home }}/.config/autostart/fcitx5.desktop"
+    content: |
+      [Desktop Entry]
+      Name=Fcitx5
+      Exec=fcitx5
+      Type=Application
+      X-GNOME-Autostart-enabled=true
+    mode: '0644'
+  become: false
+
+- name: Clear GNOME input source switch keybinding (let fcitx5 handle Ctrl+Space)
+  command: >
+    gsettings set org.gnome.desktop.wm.keybindings switch-input-source '[]'
+  become: false
+  changed_when: false
+
+- name: Clear GNOME backward input source switch keybinding
+  command: >
+    gsettings set org.gnome.desktop.wm.keybindings switch-input-source-backward '[]'
+  become: false
+  changed_when: false
