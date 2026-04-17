@@ -75,3 +75,6 @@ eval "$(uv generate-shell-completion zsh)"
 
 # sheldon loading plugins
 eval "$(sheldon source)"
+
+# opencode
+export PATH=/home/swkima/.opencode/bin:$PATH

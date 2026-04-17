@@ -7,7 +7,7 @@ config.font = wezterm.font_with_fallback({
   { family = "Hack Nerd Font Mono"},
   { family = "Noto Sans CJK JP"},
 })
-config.font_size = 12.0
+config.font_size = 14.0
 config.use_ime = true
 
 -- Window
